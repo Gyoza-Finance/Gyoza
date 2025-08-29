@@ -2,7 +2,7 @@
 
 import type { MenuItem } from "./Menu";
 
-import { Logo } from "@/src/comps/Logo/Logo";
+import { LogoFull } from "@/src/comps/Logo/LogoFull";
 import { Tag } from "@/src/comps/Tag/Tag";
 import { DEPLOYMENT_FLAVOR } from "@/src/env";
 import { useWhiteLabelHeader } from "@/src/hooks/useWhiteLabel";
@@ -82,53 +82,33 @@ export function TopBar() {
             <div
               className={css({
                 flexShrink: 0,
-              })}
-            >
-              <Logo size={32} />
-            </div>
-            <div
-              className={css({
-                flexShrink: 1,
-                overflow: "hidden",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                medium: {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                },
-                whiteSpace: "nowrap",
+                alignItems: "center",
+                gap: 8,
               })}
             >
-              <div>{headerConfig.appName}</div>
+              <LogoFull height={32} />
               {DEPLOYMENT_FLAVOR && (
-                <div
-                  className={css({
-                    display: "grid",
-                  })}
+                <Tag
+                  size="mini"
+                  css={{
+                    color: "accentContent",
+                    background: "brandCoral",
+                    border: 0,
+                    textTransform: "uppercase",
+                    overflow: "hidden",
+                  }}
                 >
-                  <Tag
-                    size="mini"
-                    css={{
-                      color: "accentContent",
-                      background: "brandCoral",
-                      border: 0,
-                      textTransform: "uppercase",
+                  <div
+                    className={css({
+                      whiteSpace: "nowrap",
                       overflow: "hidden",
-                    }}
+                      textOverflow: "ellipsis",
+                    })}
                   >
-                    <div
-                      className={css({
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      })}
-                    >
-                      {DEPLOYMENT_FLAVOR}
-                    </div>
-                  </Tag>
-                </div>
+                    {DEPLOYMENT_FLAVOR}
+                  </div>
+                </Tag>
               )}
             </div>
           </Link>

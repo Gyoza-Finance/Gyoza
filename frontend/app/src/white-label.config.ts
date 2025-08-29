@@ -182,11 +182,11 @@ export const WHITE_LABEL_CONFIG = {
   // ===========================
   branding: {
     // Core app identity
-    appName: "NEW NAME V2",        // Full app name for titles, about pages
-    brandName: "New Name",         // Core brand name for protocol/version references
+    appName: "Gyoza",
+    brandName: "Gyoza",
     appTagline: "Next-gen borrowing protocol",
     appDescription: "A new borrowing protocol that lets users deposit ETH or LSTs as collateral",
-    appUrl: "https://www.newname.org/",
+    appUrl: "https://www.gyoza.finance/",
     
     // External links
     links: {
