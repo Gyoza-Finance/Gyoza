@@ -40,9 +40,9 @@ export const WHITE_LABEL_CONFIG = {
   tokens: {
     // Main protocol stablecoin
     mainToken: {
-      name: "LOL",
-      symbol: "LOL" as const, 
-      ticker: "LOL",
+      name: "gyUSD",
+      symbol: "gyUSD" as const, 
+      ticker: "gyUSD",
       decimals: 18,
       description: "USD-pegged stablecoin",
       icon: "main-token",
@@ -170,8 +170,8 @@ export const WHITE_LABEL_CONFIG = {
       },
       // Staked version of main token
       staked: {
-        symbol: "SBOLD" as const,
-        name: "sLOL", // s + mainToken symbol
+        symbol: "sgyUSD" as const,
+        name: "sgyUSD", // s + mainToken symbol
         icon: "staked-main-token",
       },
     },
