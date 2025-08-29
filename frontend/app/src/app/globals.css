@@ -1,0 +1,140 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/InterVariable.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 100;
+  src: url('/K2D/K2D-Thin.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 100;
+  src: url('/K2D/K2D-ThinItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 200;
+  src: url('/K2D/K2D-ExtraLight.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 200;
+  src: url('/K2D/K2D-ExtraLightItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/K2D/K2D-Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 300;
+  src: url('/K2D/K2D-LightItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/K2D/K2D-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/K2D/K2D-Italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/K2D/K2D-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 500;
+  src: url('/K2D/K2D-MediumItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/K2D/K2D-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 600;
+  src: url('/K2D/K2D-SemiBoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/K2D/K2D-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 700;
+  src: url('/K2D/K2D-BoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: normal;
+  font-weight: 800;
+  src: url('/K2D/K2D-ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'K2D';
+  font-style: italic;
+  font-weight: 800;
+  src: url('/K2D/K2D-ExtraBoldItalic.ttf') format('truetype');
+}
+
+/* Global font styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Headings and titles use K2D */
+h1, h2, h3, h4, h5, h6,
+.title,
+[data-title],
+[class*="title"],
+[class*="Title"],
+[class*="heading"],
+[class*="Heading"] {
+  font-family: 'K2D', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
