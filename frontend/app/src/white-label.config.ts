@@ -158,6 +158,146 @@ export const WHITE_LABEL_CONFIG = {
           },
         },
       },
+      {
+        symbol: "RON" as const,
+        name: "Wrapped Ronin",
+        icon: "ron",
+        collateralRatio: 1.3, // 130% MCR
+        maxDeposit: "5000000",
+        maxLTV: 0.769231,
+        deployments: {
+          1: {
+            collToken: "0xe514d9deb7966c8be0ca922de8a064264ea6bcd4",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          11155111: {
+            collToken: "0xe514d9deb7966c8be0ca922de8a064264ea6bcd4",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          2020: {
+            collToken: "0xe514d9deb7966c8be0ca922de8a064264ea6bcd4",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+        },
+      },
+      {
+        symbol: "LRON" as const,
+        name: "Liquid RON",
+        icon: "lron",
+        collateralRatio: 1.4, // 140% MCR
+        maxDeposit: "3000000",
+        maxLTV: 0.714286,
+        deployments: {
+          1: {
+            collToken: "0xcad9e7aa2c3ef07bad0a7b69f97d059d8f36edd2",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          11155111: {
+            collToken: "0xcad9e7aa2c3ef07bad0a7b69f97d059d8f36edd2",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          2020: {
+            collToken: "0xcad9e7aa2c3ef07bad0a7b69f97d059d8f36edd2",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+        },
+      },
+      {
+        symbol: "AXS" as const,
+        name: "Axie Infinity",
+        icon: "axs",
+        collateralRatio: 1.5, // 150% MCR
+        maxDeposit: "2000000",
+        maxLTV: 0.666667,
+        deployments: {
+          1: {
+            collToken: "0x97a9107c1793bc407d6f527b77e7fff4d812bece",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          11155111: {
+            collToken: "0x97a9107c1793bc407d6f527b77e7fff4d812bece",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          2020: {
+            collToken: "0x97a9107c1793bc407d6f527b77e7fff4d812bece",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+        },
+      },
+      {
+        symbol: "SLP" as const,
+        name: "Smooth Love Potion",
+        icon: "slp",
+        collateralRatio: 1.7, // 170% MCR
+        maxDeposit: "1000000",
+        maxLTV: 0.588235,
+        deployments: {
+          1: {
+            collToken: "0xa8754b9fa15fc18bb59458815510e40a12cd2014",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          11155111: {
+            collToken: "0xa8754b9fa15fc18bb59458815510e40a12cd2014",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          2020: {
+            collToken: "0xa8754b9fa15fc18bb59458815510e40a12cd2014",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+        },
+      },
+      {
+        symbol: "FBTC" as const,
+        name: "Fire BTC",
+        icon: "fbtc",
+        collateralRatio: 1.12, // 112% MCR
+        maxDeposit: "100000000",
+        maxLTV: 0.892857,
+        deployments: {
+          1: {
+            collToken: "0xc96de26018a54d51c097160568752c4e3bd6c364",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          11155111: {
+            collToken: "0xc96de26018a54d51c097160568752c4e3bd6c364",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+          2020: {
+            collToken: "0xc96de26018a54d51c097160568752c4e3bd6c364",
+            leverageZapper: "0x0000000000000000000000000000000000000001",
+            stabilityPool: "0x0000000000000000000000000000000000000002",
+            troveManager: "0x0000000000000000000000000000000000000003",
+          },
+        },
+      },
     ],
 
     // Other tokens in the protocol
@@ -168,10 +308,9 @@ export const WHITE_LABEL_CONFIG = {
         name: "LUSD",
         icon: "legacy-stablecoin",
       },
-      // Staked version of main token
       staked: {
-        symbol: "sgyUSD" as const,
-        name: "sgyUSD", // s + mainToken symbol
+        symbol: "DISABLED_STAKED" as const,
+        name: "Disabled Staked Token",
         icon: "staked-main-token",
       },
     },
@@ -252,7 +391,7 @@ export const WHITE_LABEL_CONFIG = {
   // ===========================
   earnPools: {
     // Enable/disable the staked main token pool (sSBOLD/etc)
-    enableStakedMainToken: true,
+    enableStakedMainToken: false, // Disabled - no sgyUSD
     
     // Enable/disable stability pools for collaterals
     enableStabilityPools: true,
