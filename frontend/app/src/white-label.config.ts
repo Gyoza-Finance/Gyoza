@@ -272,7 +272,7 @@ export const WHITE_LABEL_CONFIG = {
       },
       {
         symbol: "FBTC" as const,
-        name: "Fire BTC",
+        name: "Function BTC",
         icon: "fbtc",
         collateralRatio: 1.12, // 112% MCR
         maxDeposit: "100000000",
