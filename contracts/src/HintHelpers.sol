@@ -6,6 +6,12 @@ import "./Interfaces/ICollateralRegistry.sol";
 import "./Dependencies/LiquityMath.sol";
 import "./Dependencies/Constants.sol";
 import "./Interfaces/IHintHelpers.sol";
+import "./Interfaces/IActivePool.sol";
+import "./Interfaces/ISortedTroves.sol";
+import "./Interfaces/ITroveManager.sol";
+import "./Types/LatestTroveData.sol";
+import "./Types/LatestBatchData.sol";
+import "./Types/TroveChange.sol";
 
 contract HintHelpers is IHintHelpers {
     string public constant NAME = "HintHelpers";
@@ -30,7 +36,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256 hintId, uint256 diff, uint256 latestRandomSeed)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         ISortedTroves sortedTroves = troveManager.sortedTroves();
 
         uint256 arrayLength = troveManager.getTroveIdsCount();
@@ -73,7 +79,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
 
         TroveChange memory openTrove;
@@ -89,7 +95,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestTroveData memory trove = troveManager.getLatestTroveData(_troveId);
 
@@ -108,7 +114,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestTroveData memory trove = troveManager.getLatestTroveData(_troveId);
 
@@ -136,7 +142,7 @@ contract HintHelpers is IHintHelpers {
     {
         if (_debtIncrease == 0) return 0;
 
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestTroveData memory trove = troveManager.getLatestTroveData(_troveId);
         (,,,,,,,, address batchManager,) = troveManager.Troves(_troveId);
@@ -166,7 +172,7 @@ contract HintHelpers is IHintHelpers {
         address _batchAddress,
         uint256 _newInterestRate
     ) external view returns (uint256) {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestBatchData memory batch = troveManager.getLatestBatchData(_batchAddress);
 
@@ -191,7 +197,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestBatchData memory batch = troveManager.getLatestBatchData(_batchAddress);
 
@@ -211,7 +217,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestTroveData memory trove = troveManager.getLatestTroveData(_troveId);
         LatestBatchData memory batch = troveManager.getLatestBatchData(_batchAddress);
@@ -232,7 +238,7 @@ contract HintHelpers is IHintHelpers {
         view
         returns (uint256)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         IActivePool activePool = troveManager.activePool();
         LatestTroveData memory trove = troveManager.getLatestTroveData(_troveId);
         (,,,,,,,, address batchManager,) = troveManager.Troves(_troveId);
