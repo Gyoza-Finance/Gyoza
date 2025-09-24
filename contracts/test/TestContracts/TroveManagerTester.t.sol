@@ -16,7 +16,7 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
     // Extra buffer of collateral ratio to join a batch or adjust a trove inside a batch (on top of MCR)
     uint256 public immutable BCR;
 
-    constructor(IAddressesRegistry _addressesRegistry) TroveManager(_addressesRegistry) {
+    constructor(IAddressesRegistry _addressesRegistry, uint256 _branchId) TroveManager(_addressesRegistry, _branchId) {
         BCR = _addressesRegistry.BCR();
     }
 
@@ -28,11 +28,11 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
     }
 
     function get_CCR() external view returns (uint256) {
-        return CCR;
+        return CCR();
     }
 
     function get_MCR() external view returns (uint256) {
-        return MCR;
+        return MCR();
     }
 
     function get_BCR() external view returns (uint256) {
@@ -40,7 +40,7 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
     }
 
     function get_SCR() external view returns (uint256) {
-        return SCR;
+        return SCR();
     }
 
     function get_LIQUIDATION_PENALTY_SP() external view returns (uint256) {
@@ -96,7 +96,7 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
     }
 
     function checkBelowCriticalThreshold(uint256 _price) external view override returns (bool) {
-        return _checkBelowCriticalThreshold(_price, CCR);
+        return _checkBelowCriticalThreshold(_price, CCR());
     }
 
     function computeICR(uint256 _coll, uint256 _debt, uint256 _price) external pure returns (uint256) {
@@ -105,7 +105,7 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
 
     function getCollGasCompensation(uint256 _entireColl, uint256 _entireDebt, uint256 _boldInSPForOffsets)
         external
-        pure
+        view
         returns (uint256)
     {
         uint256 collSubjectToGasCompensation = _entireColl;
@@ -115,7 +115,7 @@ contract TroveManagerTester is ITroveManagerTester, TroveManager {
         return _getCollGasCompensation(collSubjectToGasCompensation);
     }
 
-    function getCollGasCompensation(uint256 _coll) external pure returns (uint256) {
+    function getCollGasCompensation(uint256 _coll) external view returns (uint256) {
         return _getCollGasCompensation(_coll);
     }
 
