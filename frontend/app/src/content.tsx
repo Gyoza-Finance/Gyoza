@@ -214,7 +214,7 @@ export default {
     },
     earnTable: {
       title: `Earn rewards with ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`,
-      subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} ETH rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
+      subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} & ETH rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
       forksInfo: {
         text: (
           <>
@@ -227,6 +227,14 @@ export default {
           label: "Learn more",
           title: WHITE_LABEL_CONFIG.branding.features.friendlyFork.title,
         },
+      },
+    },
+    yieldTable: {
+      title: "Top 3 external yield opportunities",
+      hint: {
+        title: "All yield sources on Dune",
+        url: "https://dune.com/liquity/liquity-v2-yields",
+        label: "Learn more",
       },
     },
     statsBar: {
