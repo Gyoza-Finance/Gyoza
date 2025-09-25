@@ -69,9 +69,9 @@ contract troveNFTTest is DevTestSetup {
 
         TestDeployer.TroveManagerParams[] memory troveManagerParamsArray =
             new TestDeployer.TroveManagerParams[](NUM_COLLATERALS);
-        troveManagerParamsArray[0] = TestDeployer.TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16);
-        troveManagerParamsArray[1] = TestDeployer.TroveManagerParams(160e16, 120e16, 10e16, 120e16, 5e16, 10e16);
-        troveManagerParamsArray[2] = TestDeployer.TroveManagerParams(160e16, 120e16, 10e16, 120e16, 5e16, 10e16);
+        troveManagerParamsArray[0] = TestDeployer.TroveManagerParams(150e16, 110e16, 10e16, 110e16, 10_000_000_000e18, 5e16, 10e16, 0);
+        troveManagerParamsArray[1] = TestDeployer.TroveManagerParams(160e16, 120e16, 10e16, 120e16, 10_000_000_000e18, 5e16, 10e16, 1);
+        troveManagerParamsArray[2] = TestDeployer.TroveManagerParams(160e16, 120e16, 10e16, 120e16, 10_000_000_000e18, 5e16, 10e16, 2);
 
         TestDeployer deployer = new TestDeployer();
         TestDeployer.LiquityContractsDev[] memory _contractsArray;
@@ -135,14 +135,14 @@ contract troveNFTTest is DevTestSetup {
     }
 
     function testTroveNFTMetadata() public view {
-        assertEq(troveNFTWETH.name(), "Liquity V2 - Wrapped Ether Tester", "Invalid Trove Name");
-        assertEq(troveNFTWETH.symbol(), "LV2_WETH", "Invalid Trove Symbol");
+        assertEq(troveNFTWETH.name(), "Gyoza - Wrapped Ether Tester", "Invalid Trove Name");
+        assertEq(troveNFTWETH.symbol(), "GY_WETH", "Invalid Trove Symbol");
 
-        assertEq(troveNFTWstETH.name(), "Liquity V2 - Wrapped Staked Ether", "Invalid Trove Name");
-        assertEq(troveNFTWstETH.symbol(), "LV2_wstETH", "Invalid Trove Symbol");
+        assertEq(troveNFTWstETH.name(), "Gyoza - Wrapped Staked Ether", "Invalid Trove Name");
+        assertEq(troveNFTWstETH.symbol(), "GY_wstETH", "Invalid Trove Symbol");
 
-        assertEq(troveNFTRETH.name(), "Liquity V2 - Rocket Pool ETH", "Invalid Trove Name");
-        assertEq(troveNFTRETH.symbol(), "LV2_rETH", "Invalid Trove Symbol");
+        assertEq(troveNFTRETH.name(), "Gyoza - Rocket Pool ETH", "Invalid Trove Name");
+        assertEq(troveNFTRETH.symbol(), "GY_rETH", "Invalid Trove Symbol");
     }
 
     string topMulti =

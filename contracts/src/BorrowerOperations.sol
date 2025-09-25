@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.24;
 
-import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+// import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./Interfaces/IBorrowerOperations.sol";
 import "./Interfaces/IAddressesRegistry.sol";
@@ -16,10 +16,10 @@ import "./Types/LatestTroveData.sol";
 import "./Types/LatestBatchData.sol";
 
 contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperations {
-    using SafeERC20 for IERC20;
+    // using SafeERC20 for IERC20;
 
     // --- Connected contract declarations ---
-
+    IAddressesRegistry internal immutable addressesRegistry;
     IERC20 internal immutable collToken;
     ITroveManager internal troveManager;
     address internal gasPoolAddress;
@@ -30,19 +30,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     // Wrapped ETH for liquidation reserve (gas compensation)
     IWETH internal immutable WETH;
 
-    // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, some borrowing operation restrictions are applied
-    uint256 public immutable CCR;
-
-    // Shutdown system collateral ratio. If the system's total collateral ratio (TCR) for a given collateral falls below the SCR,
-    // the protocol triggers the shutdown of the borrow market and permanently disables all borrowing operations except for closing Troves.
-    uint256 public immutable SCR;
     bool public hasBeenShutDown;
-
-    // Minimum collateral ratio for individual troves
-    uint256 public immutable MCR;
-
-    // Extra buffer of collateral ratio to join a batch or adjust a trove inside a batch (on top of MCR)
-    uint256 public immutable BCR;
 
     /*
     * Mapping from TroveId to individual delegate for interest rate setting.
@@ -171,14 +159,10 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         // This makes impossible to open a trove with zero withdrawn Bold
         assert(MIN_DEBT > 0);
 
+        addressesRegistry = _addressesRegistry;
         collToken = _addressesRegistry.collToken();
 
         WETH = _addressesRegistry.WETH();
-
-        CCR = _addressesRegistry.CCR();
-        SCR = _addressesRegistry.SCR();
-        MCR = _addressesRegistry.MCR();
-        BCR = _addressesRegistry.BCR();
 
         troveManager = _addressesRegistry.troveManager();
         gasPoolAddress = _addressesRegistry.gasPoolAddress();
@@ -194,6 +178,27 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
 
         // Allow funds movements between Liquity contracts
         collToken.approve(address(activePool), type(uint256).max);
+    }
+
+    // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, some borrowing operation restrictions are applied
+    function CCR() public view returns (uint256) {
+        return addressesRegistry.CCR();
+    }
+
+    // Minimum collateral ratio for individual troves
+    function MCR() public view returns (uint256) {
+        return addressesRegistry.MCR();
+    }
+
+    // Shutdown system collateral ratio. If the system's total collateral ratio (TCR) for a given collateral falls below the SCR,
+    // the protocol triggers the shutdown of the borrow market and permanently disables all borrowing operations except for closing Troves.
+    function SCR() public view returns (uint256) {
+        return addressesRegistry.SCR();
+    }
+
+    // Extra buffer of collateral ratio to join a batch or adjust a trove inside a batch (on top of MCR)
+    function BCR() public view returns (uint256) {
+        return addressesRegistry.BCR();
     }
 
     // --- Borrower Trove Operations ---
@@ -336,6 +341,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         _requireUserAcceptsUpfrontFee(_change.upfrontFee, _maxUpfrontFee);
 
         vars.entireDebt = _change.debtIncrease + _change.upfrontFee;
+        require(troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt() + vars.entireDebt, "BorrowerOperations: Debt limit exceeded.");
         _requireAtLeastMinDebt(vars.entireDebt);
 
         vars.ICR = LiquityMath._computeCR(_collAmount, vars.entireDebt, vars.price);
@@ -414,7 +420,8 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     function withdrawBold(uint256 _troveId, uint256 _boldAmount, uint256 _maxUpfrontFee) external override {
         ITroveManager troveManagerCached = troveManager;
         _requireTroveIsActive(troveManagerCached, _troveId);
-
+        require(isBranchActive(), "BorrowerOperations: Branch is not active");
+        
         TroveChange memory troveChange;
         troveChange.debtIncrease = _boldAmount;
         _adjustTrove(troveManagerCached, _troveId, troveChange, _maxUpfrontFee);
@@ -466,6 +473,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     ) external override {
         ITroveManager troveManagerCached = troveManager;
         _requireTroveIsActive(troveManagerCached, _troveId);
+        require(isBranchActive(), "BorrowerOperations: Branch is not active");
 
         TroveChange memory troveChange;
         _initTroveChange(troveChange, _collChange, _isCollIncrease, _boldChange, _isDebtIncrease);
@@ -484,6 +492,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     ) external override {
         ITroveManager troveManagerCached = troveManager;
         _requireTroveIsZombie(troveManagerCached, _troveId);
+        require(isBranchActive(), "BorrowerOperations: Branch is not active");
 
         TroveChange memory troveChange;
         _initTroveChange(troveChange, _collChange, _isCollIncrease, _boldChange, _isDebtIncrease);
@@ -567,7 +576,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         vars.boldToken = boldToken;
 
         vars.price = _requireOraclesLive();
-        vars.isBelowCriticalThreshold = _checkBelowCriticalThreshold(vars.price, CCR);
+        vars.isBelowCriticalThreshold = _checkBelowCriticalThreshold(vars.price, CCR());
 
         // --- Checks ---
 
@@ -1227,7 +1236,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
 
         // Otherwise, proceed with the TCR check:
         uint256 TCR = LiquityMath._computeCR(totalColl, totalDebt, price);
-        if (TCR >= SCR) revert TCRNotBelowSCR();
+        if (TCR >= SCR()) revert TCRNotBelowSCR();
 
         _applyShutdown();
 
@@ -1280,6 +1289,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         IActivePool _activePool
     ) internal {
         if (_troveChange.debtIncrease > 0) {
+            require(troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt(), "BorrowerOperations: Debt limit exceeded.");
             _boldToken.mint(withdrawalReceiver, _troveChange.debtIncrease);
         } else if (_troveChange.debtDecrease > 0) {
             _boldToken.burn(msg.sender, _troveChange.debtDecrease);
@@ -1296,7 +1306,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
 
     function _pullCollAndSendToActivePool(IActivePool _activePool, uint256 _amount) internal {
         // Send Coll tokens from sender to active pool
-        collToken.safeTransferFrom(msg.sender, address(_activePool), _amount);
+        collToken.transferFrom(msg.sender, address(_activePool), _amount);
         // Make sure Active Pool accountancy is right
         _activePool.accountForReceivedColl(_amount);
     }
@@ -1442,19 +1452,19 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     }
 
     function _requireICRisAboveMCR(uint256 _newICR) internal view {
-        if (_newICR < MCR) {
+        if (_newICR < MCR()) {
             revert ICRBelowMCR();
         }
     }
 
     function _requireICRisAboveMCRPlusBCR(uint256 _newICR) internal view {
-        if (_newICR < MCR + BCR) {
+        if (_newICR < MCR() + BCR()) {
             revert ICRBelowMCRPlusBCR();
         }
     }
 
     function _requireNoBorrowingUnlessNewTCRisAboveCCR(uint256 _debtIncrease, uint256 _newTCR) internal view {
-        if (_debtIncrease > 0 && _newTCR < CCR) {
+        if (_debtIncrease > 0 && _newTCR < CCR()) {
             revert TCRBelowCCR();
         }
     }
@@ -1466,7 +1476,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     }
 
     function _requireNewTCRisAboveCCR(uint256 _newTCR) internal view {
-        if (_newTCR < CCR) {
+        if (_newTCR < CCR()) {
             revert TCRBelowCCR();
         }
     }
@@ -1612,5 +1622,9 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         totalDebt -= _troveChange.debtDecrease;
 
         newTCR = LiquityMath._computeCR(totalColl, totalDebt, _price);
+    }
+
+    function isBranchActive() public view returns (bool) {
+        return troveManager.isActive();
     }
 }

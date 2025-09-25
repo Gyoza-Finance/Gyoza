@@ -16,7 +16,7 @@ import "./Dependencies/LiquityBase.sol";
 
 contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     // --- Connected contract declarations ---
-
+    uint256 public branchId;
     ITroveNFT public troveNFT;
     IBorrowerOperations public borrowerOperations;
     IStabilityPool public stabilityPool;
@@ -26,22 +26,29 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     // A doubly linked list of Troves, sorted by their interest rate
     ISortedTroves public sortedTroves;
     ICollateralRegistry internal collateralRegistry;
+    IAddressesRegistry public addressesRegistry;
+
     // Wrapped ETH for liquidation reserve (gas compensation)
     IWETH internal immutable WETH;
 
     // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, some borrowing operation restrictions are applied
-    uint256 public immutable CCR;
+    // uint256 public immutable CCR;
 
-    // Minimum collateral ratio for individual troves
-    uint256 internal immutable MCR;
-    // Shutdown system collateral ratio. If the system's total collateral ratio (TCR) for a given collateral falls below the SCR,
-    // the protocol triggers the shutdown of the borrow market and permanently disables all borrowing operations except for closing Troves.
-    uint256 internal immutable SCR;
+    // // Minimum collateral ratio for individual troves
+    // uint256 internal immutable MCR;
+    // // Shutdown system collateral ratio. If the system's total collateral ratio (TCR) for a given collateral falls below the SCR,
+    // // the protocol triggers the shutdown of the borrow market and permanently disables all borrowing operations except for closing Troves.
+    // uint256 internal immutable SCR;
 
     // Liquidation penalty for troves offset to the SP
     uint256 internal immutable LIQUIDATION_PENALTY_SP;
     // Liquidation penalty for troves redistributed
     uint256 internal immutable LIQUIDATION_PENALTY_REDISTRIBUTION;
+
+    // Maximum debt allowed on this branch
+    //Current debt on this branch is tracked via getEntireBranchDebt() in LiquityBase.sol
+    uint256 public debtLimit;
+    uint256 public initialDebtLimit;
 
     // --- Data structures ---
 
@@ -119,6 +126,10 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     // Timestamp at which branch was shut down. 0 if not shut down.
     uint256 public shutdownTime;
 
+    //gas compensation max reward. Must be higher for different assets.
+    uint256 public gasCompensationMaxReward;
+
+
     /*
     * --- Variable container structs for liquidations ---
     *
@@ -186,10 +197,12 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event CollateralRegistryAddressChanged(address _collateralRegistryAddress);
 
-    constructor(IAddressesRegistry _addressesRegistry) LiquityBase(_addressesRegistry) {
-        CCR = _addressesRegistry.CCR();
-        MCR = _addressesRegistry.MCR();
-        SCR = _addressesRegistry.SCR();
+    constructor(IAddressesRegistry _addressesRegistry, uint256 _branchId) LiquityBase(_addressesRegistry) {
+        // CCR = _addressesRegistry.CCR();
+        // MCR = _addressesRegistry.MCR();
+        // SCR = _addressesRegistry.SCR();
+        debtLimit = _addressesRegistry.debtLimit();
+        initialDebtLimit = debtLimit;
         LIQUIDATION_PENALTY_SP = _addressesRegistry.LIQUIDATION_PENALTY_SP();
         LIQUIDATION_PENALTY_REDISTRIBUTION = _addressesRegistry.LIQUIDATION_PENALTY_REDISTRIBUTION();
 
@@ -202,6 +215,8 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         sortedTroves = _addressesRegistry.sortedTroves();
         WETH = _addressesRegistry.WETH();
         collateralRegistry = _addressesRegistry.collateralRegistry();
+        addressesRegistry = _addressesRegistry;
+        branchId = _branchId;
 
         emit TroveNFTAddressChanged(address(troveNFT));
         emit BorrowerOperationsAddressChanged(address(borrowerOperations));
@@ -211,9 +226,31 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         emit BoldTokenAddressChanged(address(boldToken));
         emit SortedTrovesAddressChanged(address(sortedTroves));
         emit CollateralRegistryAddressChanged(address(collateralRegistry));
+
+        gasCompensationMaxReward = COLL_GAS_COMPENSATION_CAP;
     }
 
     // --- Getters ---
+
+    // Critical system collateral ratio. If the system's total collateral ratio (TCR) falls below the CCR, some borrowing operation restrictions are applied
+    function CCR() public view returns (uint256) {
+        return addressesRegistry.CCR();
+    }
+
+    // Minimum collateral ratio for individual troves
+    function MCR() public view returns (uint256) {
+        return addressesRegistry.MCR();
+    }
+
+    // Shutdown system collateral ratio. If the system's total collateral ratio (TCR) for a given collateral falls below the SCR,
+    // the protocol triggers the shutdown of the borrow market and permanently disables all borrowing operations except for closing Troves.
+    function SCR() public view returns (uint256) {
+        return addressesRegistry.SCR();
+    }
+
+    function isActive() public view returns (bool) {
+        return collateralRegistry.isActiveCollateral(branchId);
+    }
 
     function getTroveIdsCount() external view override returns (uint256) {
         return TroveIds.length;
@@ -332,9 +369,15 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     }
 
     // Return the amount of Coll to be drawn from a trove's collateral and sent as gas compensation.
-    function _getCollGasCompensation(uint256 _coll) internal pure returns (uint256) {
+    function _getCollGasCompensation(uint256 _coll) internal view returns (uint256) {
         // _entireDebt should never be zero, but we add the condition defensively to avoid an unexpected revert
-        return LiquityMath._min(_coll / COLL_GAS_COMPENSATION_DIVISOR, COLL_GAS_COMPENSATION_CAP);
+        return LiquityMath._min(_coll / COLL_GAS_COMPENSATION_DIVISOR, gasCompensationMaxReward);
+    }
+
+    // Allow governor to update gasCompensationMaxReward.
+    function updateGasCompensationMaxReward(uint256 _newGasCompensationMaxReward) external {
+        require(msg.sender == collateralRegistry.governor(), "Only Address Registry owner can update gasCompensationMaxReward");
+        gasCompensationMaxReward = _newGasCompensationMaxReward;
     }
 
     /* In a full liquidation, returns the values for a trove's coll and debt to be offset, and coll and debt to be
@@ -497,7 +540,7 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
 
             uint256 ICR = getCurrentICR(troveId, _price);
 
-            if (ICR < MCR) {
+            if (ICR < MCR()) {
                 LiquidationValues memory singleLiquidation;
                 LatestTroveData memory trove;
 
@@ -1212,6 +1255,10 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         }
     }
 
+    function _requireIsActiveBranch() internal view {
+        require(isActive(), "TroveManager: Collateral is not active");
+    }
+
     // --- Trove property getters ---
 
     function getUnbackedPortionPriceAndRedeemability() external returns (uint256, uint256, bool) {
@@ -1222,7 +1269,7 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         (uint256 price,) = priceFeed.fetchPrice();
         // It's redeemable if the TCR is above the shutdown threshold, and branch has not been shut down.
         // Use the normal price for the TCR check.
-        bool redeemable = _getTCR(price) >= SCR && shutdownTime == 0;
+        bool redeemable = _getTCR(price) >= SCR() && shutdownTime == 0;
 
         return (unbackedPortion, price, redeemable);
     }
@@ -1233,6 +1280,7 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         external
     {
         _requireCallerIsBorrowerOperations();
+        _requireIsActiveBranch();
 
         uint256 newStake = _computeNewStake(_troveChange.collIncrease);
 
@@ -1289,6 +1337,7 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
     ) external {
         _requireCallerIsBorrowerOperations();
         // assert(batchIds[batches[_batchAddress].arrayIndex] == _batchAddress);
+        _requireIsActiveBranch();
 
         uint256 newStake = _computeNewStake(_troveChange.collIncrease);
 
@@ -1499,9 +1548,13 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         // assert(closedStatus == Status.closedByLiquidation || closedStatus == Status.closedByOwner);
 
         uint256 TroveIdsArrayLength = TroveIds.length;
+        bool isActiveStatus = isActive();
         // If branch has not been shut down, or it's a liquidation,
         // require at least 1 trove in the system
-        if (shutdownTime == 0 || closedStatus == Status.closedByLiquidation) {
+        // ** NEW: **
+        // If branch has been removed, we don't require at least 1 trove in the system.
+        //a trove is required: 1. if the branch is active. or 2. either shutdown is 0, or the last trove is being liquidated.
+        if (isActiveStatus && (shutdownTime == 0 || closedStatus == Status.closedByLiquidation)){
             _requireMoreThanOneTroveInSystem(TroveIdsArrayLength);
         }
 
@@ -2002,5 +2055,18 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
 
         Troves[_troveId].interestBatchManager = address(0);
         Troves[_troveId].batchDebtShares = 0;
+    }
+
+    function getDebtLimit() external view returns (uint256) {
+        return debtLimit;
+    }
+
+    function getInitialDebtLimit() external view returns (uint256) {
+        return initialDebtLimit;
+    }
+
+    function setDebtLimit(uint256 _newDebtLimit) external {
+        _requireCallerIsCollateralRegistry();
+        debtLimit = _newDebtLimit;
     }
 }
