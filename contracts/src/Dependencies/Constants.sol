@@ -10,7 +10,10 @@ uint256 constant _100pct = DECIMAL_PRECISION;
 uint256 constant _1pct = DECIMAL_PRECISION / 100;
 
 // Amount of ETH to be locked in gas pool on opening troves
-uint256 constant ETH_GAS_COMPENSATION = 0.0375 ether;
+// NOTE: RON is native currency on Ronin
+// Normal tx fees on Ronin are below 0.01 RON
+// Set to 0.1 RON for buffer for potential tx fees spikes
+uint256 constant ETH_GAS_COMPENSATION = 0.1 ether;
 
 // Liquidation
 uint256 constant MIN_LIQUIDATION_PENALTY_SP = 5e16; // 5%
@@ -18,23 +21,48 @@ uint256 constant MAX_LIQUIDATION_PENALTY_REDISTRIBUTION = 20e16; // 20%
 
 // Collateral branch parameters (SETH = staked ETH, i.e. wstETH / rETH)
 uint256 constant CCR_WETH = 150 * _1pct;
-uint256 constant CCR_SETH = 160 * _1pct;
+uint256 constant CCR_TBTC = 160 * _1pct;
+uint256 constant CCR_RETH = 160 * _1pct;
+uint256 constant CCR_RON = 160 * _1pct;
+uint256 constant CCR_LRON = 160 * _1pct;
+uint256 constant CCR_AXS = 170 * _1pct;
+uint256 constant CCR_SLP = 180 * _1pct;
 
 uint256 constant MCR_WETH = 110 * _1pct;
-uint256 constant MCR_SETH = 120 * _1pct;
+uint256 constant MCR_TBTC = 110 * _1pct;
+uint256 constant MCR_RETH = 110 * _1pct;
+uint256 constant MCR_RON = 130 * _1pct;
+uint256 constant MCR_LRON = 140 * _1pct;
+uint256 constant MCR_AXS = 150 * _1pct;
+uint256 constant MCR_SLP = 170 * _1pct;
 
 uint256 constant SCR_WETH = 110 * _1pct;
-uint256 constant SCR_SETH = 120 * _1pct;
+uint256 constant SCR_TBTC = 110 * _1pct;
+uint256 constant SCR_RETH = 110 * _1pct;
+uint256 constant SCR_RON = 115 * _1pct;
+uint256 constant SCR_LRON = 120 * _1pct;
+uint256 constant SCR_AXS = 120 * _1pct;
+uint256 constant SCR_SLP = 125 * _1pct;
 
 // Batch CR buffer (same for all branches for now)
 // On top of MCR to join a batch, or adjust inside a batch
 uint256 constant BCR_ALL = 10 * _1pct;
 
 uint256 constant LIQUIDATION_PENALTY_SP_WETH = 5 * _1pct;
-uint256 constant LIQUIDATION_PENALTY_SP_SETH = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_TBTC = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_RETH = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_RON = 10 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_LRON = 10 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_AXS = 10 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_SP_SLP = 10 * _1pct;
 
 uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
-uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_SETH = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_TBTC = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_RETH = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_RON = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_LRON = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_AXS = 20 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_SLP = 20 * _1pct;
 
 // Fraction of collateral awarded to liquidator
 uint256 constant COLL_GAS_COMPENSATION_DIVISOR = 200; // dividing by 200 yields 0.5%
