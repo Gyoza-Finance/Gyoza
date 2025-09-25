@@ -44,6 +44,14 @@ uint256 constant SCR_LRON = 120 * _1pct;
 uint256 constant SCR_AXS = 120 * _1pct;
 uint256 constant SCR_SLP = 125 * _1pct;
 
+uint256 constant DEBT_LIMIT_WETH = 100_000_000e18;
+uint256 constant DEBT_LIMIT_TBTC = 100_000_000e18;
+uint256 constant DEBT_LIMIT_RETH = 25_000_000e18;
+uint256 constant DEBT_LIMIT_RON = 5_000_000e18;
+uint256 constant DEBT_LIMIT_LRON = 3_000_000e18;
+uint256 constant DEBT_LIMIT_AXS = 2_000_000e18;
+uint256 constant DEBT_LIMIT_SLP = 1_000_000e18;
+
 // Batch CR buffer (same for all branches for now)
 // On top of MCR to join a batch, or adjust inside a batch
 uint256 constant BCR_ALL = 10 * _1pct;
