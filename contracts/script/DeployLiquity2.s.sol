@@ -65,7 +65,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     using StringEquality for string;
 
     // TODO: Change these values
-    address GOVERNANCE_ADDRESS = 0x0000000000000000000000000000000000000001;
+    // address GOVERNANCE_ADDRESS = 0x0000000000000000000000000000000000000001;
     string GOVERNANCE_MANIFEST = "";
     uint256 CHAIN_ID = 2020; // Ronin Chain ID: 2020
 

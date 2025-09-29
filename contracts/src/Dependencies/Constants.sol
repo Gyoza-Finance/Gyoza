@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
+address constant GOVERNANCE_ADDRESS = 0x0000000000000000000000000000000000000001;
+
 address constant ZERO_ADDRESS = address(0);
 
 uint256 constant MAX_UINT256 = type(uint256).max;
