@@ -5,6 +5,10 @@ pragma solidity 0.8.24;
 import "./Interfaces/ICollateralRegistry.sol";
 import "./Interfaces/IMultiTroveGetter.sol";
 import "./Types/BatchId.sol";
+import "./Types/LatestTroveData.sol";
+import "./Types/LatestBatchData.sol";
+import "./Types/TroveChange.sol";
+import "./Interfaces/ISortedTroves.sol";
 
 /*  Helper contract for grabbing Trove data for the front end. Not part of the core Liquity system. */
 contract MultiTroveGetter is IMultiTroveGetter {
@@ -19,7 +23,7 @@ contract MultiTroveGetter is IMultiTroveGetter {
         view
         returns (CombinedTroveData[] memory _troves)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         require(address(troveManager) != address(0), "Invalid collateral index");
 
         ISortedTroves sortedTroves = troveManager.sortedTroves();
@@ -130,7 +134,7 @@ contract MultiTroveGetter is IMultiTroveGetter {
         view
         returns (DebtPerInterestRate[] memory data, uint256 currId)
     {
-        ITroveManager troveManager = collateralRegistry.getTroveManager(_collIndex);
+        ITroveManager troveManager = collateralRegistry.allTroveManagerAddresses(_collIndex);
         require(address(troveManager) != address(0), "Invalid collateral index");
 
         ISortedTroves sortedTroves = troveManager.sortedTroves();

@@ -59,6 +59,10 @@ function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) 
     return block.timestamp / 1 weeks * 1 weeks;
 }
 
+// TODO: Temporary. Replace and relocate.
+uint256 constant DEBT_LIMIT_WETH = 100_000_000e18;
+uint256 constant DEBT_LIMIT_SETH = 100_000_000e18;
+
 contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats, MetadataDeployment, Logging {
     using Strings for *;
     using StringFormatting for *;
@@ -280,8 +284,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             MCR: MCR_RETH,
             SCR: SCR_RETH,
             BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_RETH,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_RETH
+            DEBT_LIMIT: DEBT_LIMIT_SETH,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
         });
 
         // TBTC
@@ -611,12 +616,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // Deploy AddressesRegistries and get TroveManager addresses
         for (vars.i = 0; vars.i < vars.numCollaterals; vars.i++) {
             (IAddressesRegistry addressesRegistry, address troveManagerAddress) =
-                _deployAddressesRegistry(troveManagerParamsArray[vars.i]);
+                _deployAddressesRegistry(troveManagerParamsArray[vars.i], vars.i);
             vars.addressesRegistries[vars.i] = addressesRegistry;
             vars.troveManagers[vars.i] = ITroveManager(troveManagerAddress);
         }
 
-        r.collateralRegistry = new CollateralRegistry(r.boldToken, vars.collaterals, vars.troveManagers);
+        r.collateralRegistry = new CollateralRegistry(r.boldToken, vars.collaterals, vars.troveManagers, GOVERNANCE_ADDRESS);
         r.hintHelpers = new HintHelpers(r.collateralRegistry);
         r.multiTroveGetter = new MultiTroveGetter(r.collateralRegistry);
         r.debtInFrontHelper = new DebtInFrontHelper(r.collateralRegistry, r.hintHelpers);

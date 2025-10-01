@@ -8,6 +8,7 @@ import "./IBorrowerOperations.sol";
 import "./IStabilityPool.sol";
 import "./IBoldToken.sol";
 import "./ISortedTroves.sol";
+import "./IAddressesRegistry.sol";
 import "../Types/LatestTroveData.sol";
 import "../Types/LatestBatchData.sol";
 
@@ -22,6 +23,9 @@ interface ITroveManager is ILiquityBase {
     }
 
     function shutdownTime() external view returns (uint256);
+
+    function branchId() external view returns (uint256);
+    function isActive() external view returns (bool);
 
     function troveNFT() external view returns (ITroveNFT);
     function stabilityPool() external view returns (IStabilityPool);
@@ -46,6 +50,8 @@ interface ITroveManager is ILiquityBase {
         );
 
     function rewardSnapshots(uint256 _id) external view returns (uint256 coll, uint256 boldDebt);
+
+    function addressesRegistry() external view returns (IAddressesRegistry);
 
     function getTroveIdsCount() external view returns (uint256);
 
@@ -169,6 +175,10 @@ interface ITroveManager is ILiquityBase {
         uint256 _newBatchDebt, // entire, with interest and batch fee
         uint256 _newAnnualInterestRate
     ) external;
+
+    function setDebtLimit(uint256 _newDebtLimit) external;
+    function getDebtLimit() external view returns (uint256);
+    function getInitialDebtLimit() external view returns (uint256);
 
     // -- end of permissioned functions --
 }
