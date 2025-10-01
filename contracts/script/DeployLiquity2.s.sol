@@ -59,10 +59,16 @@ function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) 
     return block.timestamp / 1 weeks * 1 weeks;
 }
 
+// TODO: Temporary. Replace and relocate.
+uint256 constant DEBT_LIMIT_WETH = 100_000_000e18;
+uint256 constant DEBT_LIMIT_SETH = 100_000_000e18;
+
 contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats, MetadataDeployment, Logging {
     using Strings for *;
     using StringFormatting for *;
     using StringEquality for string;
+
+    address GOVERNANCE_ADDRESS = 0x0000000000000000000000000000000000000001;
 
     string constant DEPLOYMENT_MODE_COMPLETE = "complete";
     string constant DEPLOYMENT_MODE_BOLD_ONLY = "bold-only";
@@ -192,6 +198,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         uint256 MCR;
         uint256 SCR;
         uint256 BCR;
+        uint256 DEBT_LIMIT;
         uint256 LIQUIDATION_PENALTY_SP;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION;
     }
@@ -332,6 +339,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             MCR: MCR_WETH,
             SCR: SCR_WETH,
             BCR: BCR_ALL,
+            DEBT_LIMIT: DEBT_LIMIT_WETH,
             LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WETH,
             LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WETH
         });
@@ -342,6 +350,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             MCR: MCR_SETH,
             SCR: SCR_SETH,
             BCR: BCR_ALL,
+            DEBT_LIMIT: DEBT_LIMIT_SETH,
             LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
             LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
         });
@@ -552,6 +561,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         return abi.encodePacked(_creationCode, abi.encode(_addressesRegistry));
     }
 
+    function getBytecode(bytes memory _creationCode, address _addressesRegistry, uint256 _branchId) public pure returns (bytes memory) {
+        return abi.encodePacked(_creationCode, abi.encode(_addressesRegistry, _branchId));
+    }
+
     function _deployAndConnectContracts(
         TroveManagerParams[] memory troveManagerParamsArray,
         string[] memory _collNames,
@@ -603,12 +616,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // Deploy AddressesRegistries and get TroveManager addresses
         for (vars.i = 0; vars.i < vars.numCollaterals; vars.i++) {
             (IAddressesRegistry addressesRegistry, address troveManagerAddress) =
-                _deployAddressesRegistry(troveManagerParamsArray[vars.i]);
+                _deployAddressesRegistry(troveManagerParamsArray[vars.i], vars.i);
             vars.addressesRegistries[vars.i] = addressesRegistry;
             vars.troveManagers[vars.i] = ITroveManager(troveManagerAddress);
         }
 
-        r.collateralRegistry = new CollateralRegistry(r.boldToken, vars.collaterals, vars.troveManagers);
+        r.collateralRegistry = new CollateralRegistry(r.boldToken, vars.collaterals, vars.troveManagers, GOVERNANCE_ADDRESS);
         r.hintHelpers = new HintHelpers(r.collateralRegistry);
         r.multiTroveGetter = new MultiTroveGetter(r.collateralRegistry);
         r.debtInFrontHelper = new DebtInFrontHelper(r.collateralRegistry, r.hintHelpers);
@@ -624,7 +637,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 address(vars.troveManagers[vars.i]),
                 r.hintHelpers,
                 r.multiTroveGetter,
-                computeGovernanceAddress(_deployGovernanceParams)
+                computeGovernanceAddress(_deployGovernanceParams),
+                vars.i
             );
             r.contractsArray[vars.i] = vars.contracts;
         }
@@ -644,7 +658,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
     }
 
-    function _deployAddressesRegistry(TroveManagerParams memory _troveManagerParams)
+    function _deployAddressesRegistry(TroveManagerParams memory _troveManagerParams, uint256 _branchId)
         internal
         returns (IAddressesRegistry, address)
     {
@@ -654,11 +668,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             _troveManagerParams.MCR,
             _troveManagerParams.BCR,
             _troveManagerParams.SCR,
+            _troveManagerParams.DEBT_LIMIT,
             _troveManagerParams.LIQUIDATION_PENALTY_SP,
             _troveManagerParams.LIQUIDATION_PENALTY_REDISTRIBUTION
         );
         address troveManagerAddress = vm.computeCreate2Address(
-            SALT, keccak256(getBytecode(type(TroveManager).creationCode, address(addressesRegistry)))
+            SALT, keccak256(getBytecode(type(TroveManager).creationCode, address(addressesRegistry), _branchId))
         );
 
         return (addressesRegistry, troveManagerAddress);
@@ -673,7 +688,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         address _troveManagerAddress,
         IHintHelpers _hintHelpers,
         IMultiTroveGetter _multiTroveGetter,
-        address _governance
+        address _governance,
+        uint256 _branchId
     ) internal returns (LiquityContracts memory contracts) {
         LiquityContractAddresses memory addresses;
         contracts.collToken = _collToken;
@@ -740,8 +756,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         contracts.addressesRegistry.setAddresses(addressVars);
 
         contracts.borrowerOperations = new BorrowerOperations{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveManager = new TroveManager{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry);
+        contracts.troveManager = new TroveManager{salt: SALT}(contracts.addressesRegistry, _branchId);
+        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry, GOVERNANCE_ADDRESS);
         contracts.stabilityPool = new StabilityPool{salt: SALT}(contracts.addressesRegistry);
         contracts.activePool = new ActivePool{salt: SALT}(contracts.addressesRegistry);
         contracts.defaultPool = new DefaultPool{salt: SALT}(contracts.addressesRegistry);
