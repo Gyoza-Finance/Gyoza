@@ -1,6 +1,34 @@
 # [Gyoza Finance](https://www.gyoza.finance/)
 
-Issues the gyUSD stablecoin on the Ronin blockchain. Coming soon.
+The gyUSD stablecoin on the Ronin blockchain. Coming soon.
+
+## Changes between Must Finance and Liquity:
+1. New collateral types and pricefeeds (below).
+2. Ability to add and remove collateral branches via new admin funtions in the Collateral Registry.
+3. Governoring of more protocol parameters, such as fees, LTV requirements, minimum debt, minimum interest rate, and more.
+4. Removal of Liquity Governance in favor directing 25% of fees to a treasury for governance control.
+
+## PriceFeeds
+1. WETH
+2. tBTC
+3. rETH
+4. wstETH
+5. RON
+6. LRON
+7. AXS
+8. SLP
+
+## Branch Creation and Deletion
+1. Only governor is able to create and remove branches
+2. When a branch is removed, it is removed from collateral list and appended to removed collateral list.
+3. Collaterals in removed collateral list still are redeemed and liquidated until there are no more troves in its branch. Then, it is removed from removed collateral list and permanently deleted. Check troves in branch in removed collateral list during redemptions and liquidations for this.
+4. Users can still pay back there debt in active troves but cannot create new debt once branch is in the removed collateral list. User must pay back above minimum repayment amount.
+5. Adding a new branch in collateral list creates a new unique index in all collaterals mapping and appends that index in the collateral list (the active collaterals).
+6. BoldToken checks if minting is coming from an active branch or removed branch (as a failsafe. Branch also checks and disables issuing new debt if in removed collateral list). Mints if active. Does NOT mint if branch is removed.
+7. Deposits into the Stability Pool of removed collateral types are still allowed. This is to ensure liquidations can still process if more deposits are required to do so.
+
+## Collateral Registry
+Each collateral branch has a unique `uint branchId` that is used to get correct collateral branch in the `CollateralRegistry`. The `TroveManager` and collateral token of each branch is stored in the mappings `allCollateralTokenAddresses` and `allTroveManagerAddresses` by their respective `branchId`. 
 
 ## Table of Contents
 
